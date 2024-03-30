@@ -5,7 +5,7 @@ Welcome to the Documentation folder! This directory contains various documents a
 ## Contents
 
 - `Documentation.docx`: Detailed documentation in Microsoft Word format.
-- `Documentation.pdf`: Summary documentation in PDF format.
+- `Documentation.pdf`: Detailed documentation in PDF format.
 - `Notebook`: Subfolder containing Jupyter notebook for model investigation.
   - `model_investigation.ipynb`: Jupyter notebook exploring model details and investigation.
 
