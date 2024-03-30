@@ -1,0 +1,66 @@
+version: '3'
+services:
+  db:
+    build: Backend/Database
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: games_db
+      MYSQL_ROOT_PASSWORD: secret
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: games_db
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    depends_on:
+      - db
+
+  spark-history-server:
+    image: bitnami/spark:3.3.2
+    command: "/opt/bitnami/spark/sbin/start-history-server.sh"
+    ports:
+      - "18080:18080"
+    volumes:
+      - ./spark-events:/spark-events
+    environment:
+      - SPARK_HISTORY_OPTS="-Dspark.history.fs.logDirectory=/spark-events"
+    depends_on:
+      - recommender
+
+  recommender:
+    build: 
+      context: ./Backend/Model
+      dockerfile: Dockerfile
+    volumes:
+      - ./Backend/jars/mysql-connector-j-8.3.0/mysql-connector-j-8.3.0.jar:/app/jars/mysql-connector-j-8.3.0.jar
+      - ./spark-events:/tmp/spark-events
+    depends_on:
+      - db
+    ports:
+      - "4040:4040"
+    command: sh -c "sleep 10 && spark-submit --master local[*] --driver-memory 4g --executor-memory 8g --conf spark.serializer=org.apache.spark.serializer.KryoSerializer --conf spark.sql.shuffle.partitions=100 --conf spark.executor.cores=4 --conf spark.eventLog.enabled=true --conf spark.eventLog.dir=/tmp/spark-events --driver-class-path /app/jars/mysql-connector-j-8.3.0.jar --jars /app/jars/mysql-connector-j-8.3.0.jar /app/recommender.py && exit 0"
+
+  api:
+    build: Backend/API
+    ports:
+      - "5001:5000"
+    depends_on:
+      recommender:
+        condition: service_completed_successfully
+
+  frontend:
+    build: Frontend
+    ports:
+      - "8501:8501"
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  mongodb_data:
