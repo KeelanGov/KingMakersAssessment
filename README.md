@@ -12,7 +12,7 @@ Files/Folders included:
 
 ## [Recommender](Recommender/README.md)
 
-The Recommender component is a recommendation system that utilizes machine learning techniques. Click the link above to learn more about how to deploy the Recommender system and its components.
+The Recommender component is a content-based game recommender system with a streamlit frontend that displays, given a player_id, a list of 10 recommendations. Click the link above to learn more about how to deploy the Recommender system and its components.
 
 Files/Folders included:
 - Backend
@@ -22,7 +22,7 @@ Files/Folders included:
 
 ## [Documentation](Documents/README.md)
 
-For additional documentation and information about the project, including the please refer to the Documentation folder.
+For additional documentation and information about the project, please refer to the Documentation folder.
 
 Files/Folders included: 
 - Diagrams
