@@ -15,7 +15,7 @@ services:
     volumes:
       - mongodb_data:/data/db
     environment:
-      MONGO_INITDB_DATABASE: games_db
+      MONGO_INITDB_DATABASE: recommendations
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: secret
     depends_on:
@@ -58,6 +58,9 @@ services:
     build: Frontend
     ports:
       - "8501:8501"
+    volumes:
+      - ./Frontend:/app
+    command: streamlit run /app/app.py
     depends_on:
       api:
         condition: service_started

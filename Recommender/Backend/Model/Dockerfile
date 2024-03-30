@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir --retries 3 --timeout 300 --trusted-host pypi.org
 
 # Install Java 11 and procps (provides the "ps" command)
 RUN apt-get update && \
-    apt-get install -y openjdk-11-jdk procps && \
+    apt-get install -y openjdk-11-jdk procps scala && \
     apt-get clean
 
 # Set the JAVA_HOME environment variable

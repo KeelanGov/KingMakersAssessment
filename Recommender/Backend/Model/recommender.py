@@ -1,11 +1,13 @@
 from pyspark.sql import SparkSession
 from pyspark.ml.feature import Tokenizer, HashingTF, IDF, VectorAssembler, MinMaxScaler, StringIndexer, OneHotEncoder
 from pyspark.ml.linalg import Vectors, DenseMatrix
-from pyspark.sql.functions import col, array, lit, countDistinct, collect_list, row_number, udf
+from pyspark.sql.functions import col, array, lit, countDistinct, collect_list, row_number, udf, explode
 from pyspark.sql.types import ArrayType, IntegerType
 from pyspark.ml.linalg import SparseVector
 from pyspark.sql.window import Window
 
+
+from pymongo import MongoClient
 
 # Create a SparkSession
 spark = SparkSession.builder \
@@ -148,9 +150,16 @@ item_neighborhoods = create_item_neighborhoods(similarity_df, k)
 # Print the neighbors for item 0
 print(f"Neighbors of item 0: {item_neighborhoods.filter(col('item_id') == 0).select('neighbors').first()[0]}")
 
-# Write item_neighborhoods DataFrame to MongoDB
-item_neighborhoods.write.format("mongo").option("uri", "mongodb://localhost:27017/database.collection").mode("overwrite").save()
+item_neighborhoods_list = [
+    {"item_id": row.item_id, "neighbors": row.neighbors}
+    for row in item_neighborhoods.collect()
+]
 
-
+# Connect to MongoDB
+client = MongoClient("mongodb://root:secret@mongodb:27017/")
+db = client["recommendations"]
+collection = db["item_neighborhoods"]
+collection.delete_many({})
+collection.insert_many(item_neighborhoods_list)
 
 spark.stop()
